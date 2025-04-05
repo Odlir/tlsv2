@@ -4,14 +4,39 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, Home, Users, School, Calendar, BarChart, FileText} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
-        icon: LayoutGrid,
+        icon: Home,
+    },
+    {
+        title: 'Personas',
+        href: '/personas',
+        icon: Users,
+    },
+    {
+        title: 'Colegios',
+        href: '/empresas',
+        icon: School,
+    },
+    {
+        title: 'Programar Encuestas',
+        href: '/encuestas',
+        icon: Calendar,
+    },
+    {
+        title: 'Reportes',
+        href: '/encuestas',
+        icon: BarChart,
+    },
+    {
+        title: 'Rep.Anual',
+        href: '/encuestas',
+        icon: FileText,
     },
 ];
 
