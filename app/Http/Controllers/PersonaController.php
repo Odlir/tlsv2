@@ -27,14 +27,13 @@ class PersonaController extends Controller
 
         $totalRecords = $dataQuery->count();
 
-
         $data = $dataQuery
             ->skip($offset)
             ->take($paginate)
-            ->orderBy('id', 'DESC')
+            ->orderBy('id', 'desc')
             ->get();
 
-        return Inertia::render('Personas/personas', [
+        return Inertia::render('personas/personas', [
             'rows' => $data,
             'totalRecords' => $totalRecords,
             'totalPages' => ceil($totalRecords / $paginate),
