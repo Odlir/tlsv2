@@ -14,7 +14,7 @@ const mainNavItems: NavItem[] = [
         icon: Home,
     },
     {
-        title: 'Personas',
+        title: 'personas',
         href: '/personas',
         icon: Users,
     },
