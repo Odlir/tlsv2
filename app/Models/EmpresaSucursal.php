@@ -10,10 +10,12 @@ class EmpresaSucursal extends Model
     use EmpresaSucursalFilterTrait;
 
     protected $fillable = [
-        'empresa_id', 'nombre', 'estado' // y los campos que necesites
+        'nombre',
+        'empresa_id',
+        'insert_user_id',
+        'edit_user_id'
     ];
 
-    // Aquí irían relaciones tipo:
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);

@@ -1,175 +1,331 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
-import { Users, UserRoundPlus } from 'lucide-react';
-//import { useState } from 'react';
+import { Head } from '@inertiajs/react';
+import axios from 'axios';
+import { Users } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { Button } from 'primereact/button';
-import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-//
-import { useRef, useState } from 'react';
-import { Toolbar } from 'primereact/toolbar';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { FloatLabel } from 'primereact/floatlabel';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
+import { InputText } from 'primereact/inputtext';
+import { TreeSelect } from 'primereact/treeselect';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Personas',
-        href: '/personas',
-    },
-];
+import { ColumnEditorOptions } from 'primereact/column';
+import { DataTableRowEditCompleteEvent } from 'primereact/datatable';
+import type { TreeNode } from 'primereact/treenode';
+import type { TreeSelectChangeEvent } from 'primereact/treeselect';
 
-export default function Personas() {
-    const { props } = usePage();
-    const personas = props.personas || [];
-    const [search, setSearch] = useState('');
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Personas', href: '/personas' }];
+
+interface Persona {
+    id: number;
+    nombres: string;
+    apellido_paterno: string;
+    apellido_materno: string;
+    sexo: string;
+    correo: string;
+    dni: string;
+    celular: string;
+}
+
+interface PersonasProps {
+    personas: Persona[];
+    totalRecords: number;
+    totalPages: number;
+}
+
+interface InputFieldProps {
+    id: string;
+    label: string;
+    type: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+interface TreeSelectFieldProps {
+    id: string;
+    label: string;
+    value: string | null;
+    onChange: (e: TreeSelectChangeEvent) => void;
+}
+
+export default function Personas({ personas }: PersonasProps) {
     const [visible, setVisible] = useState(false);
+    const [selectedPersonas, setSelectedPersonas] = useState<Persona[]>(personas);
+    const [id, setId] = useState<number | null>(null);
+    const [apellidoPaterno, setApellidoPaterno] = useState('');
+    const [apellidoMaterno, setApellidoMaterno] = useState('');
+    const [nombres, setNombres] = useState('');
+    const [genero, setGenero] = useState<string | null>(null);
+    const [correoPersonal, setCorreoPersonal] = useState('');
+    const [dni, setDni] = useState('');
+    const [celular, setCelular] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    ////////////////////
-    const [selectedProducts, setSelectedProducts] = useState([]);
-    const dt = useRef(null);
+    const generoOptions: TreeNode[] = [
+        { key: 'MASCULINO', label: 'MASCULINO', data: 'MASCULINO' },
+        { key: 'FEMENINO', label: 'FEMENINO', data: 'FEMENINO' },
+    ];
 
-    const filterGlobal = (value) => {
-        setSearch(value);
+    const onRowEditComplete = (e: DataTableRowEditCompleteEvent) => {
+        const _personas = [...selectedPersonas];
+        const { newData, index } = e;
+        _personas[index] = newData as Persona;
+        setSelectedPersonas(_personas);
     };
 
-    const handleNew = () => {
-        console.log('Abrir formulario para agregar nueva persona');
-        // Implementa la lógica para agregar una nueva persona
+    const handleEdit = (rowData: Persona) => {
+        setApellidoPaterno(rowData.apellido_paterno.split(' ')[0]);
+        setApellidoMaterno(rowData.apellido_materno.split(' ')[0]);
+        setNombres(rowData.nombres);
+        setGenero(rowData.sexo);
+        setCorreoPersonal(rowData.correo);
+        setDni(rowData.dni);
+        setCelular(rowData.celular);
+        setId(rowData.id ? Number(rowData.id) : null);
+        setVisible(true);
     };
 
-    const handleEdit = (rowData) => {
-        console.log('Editar persona:', rowData);
-        // Implementa la lógica para editar la persona seleccionada
-    };
+    const savePerson = async () => {
+        const personData = {
+            apellidoPaterno,
+            apellidoMaterno,
+            nombres,
+            genero,
+            correoPersonal,
+            dni,
+            celular,
+        };
 
-    const handleDelete = (rowData) => {
-        if (window.confirm('¿Estás seguro de eliminar esta persona?')) {
-            console.log('Eliminar persona:', rowData);
-            // Implementa la lógica para eliminar una persona
+        try {
+            if (id) {
+                await axios.put(`/personas/${id}`, personData, {
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            } else {
+                await axios.post('/personas', personData, {
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            window.location.reload();
+        } catch (error) {
+            console.error('Error al guardar la persona', error);
         }
     };
 
-    const handleDeleteSelected = () => {
-        if (window.confirm('¿Estás seguro de eliminar las personas seleccionadas?')) {
-            console.log('Eliminar personas seleccionadas:', selectedProducts);
-            // Implementa la lógica para eliminar las personas seleccionadas
-        }
+    const filteredPersonas = selectedPersonas.filter((persona) => {
+        const fullName = `${persona.apellido_paterno} ${persona.apellido_materno} ${persona.nombres} ${persona.sexo} ${persona.correo}`.toLowerCase();
+        return fullName.includes(searchTerm.toLowerCase());
+    }).sort((a, b) => a.id - b.id);
+
+
+    const resetForm = () => {
+        setApellidoPaterno('');
+        setApellidoMaterno('');
+        setNombres('');
+        setGenero(null);
+        setCorreoPersonal('');
+        setDni('');
+        setCelular('');
+        setId(null);
     };
 
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <div className="flex gap-2">
-                <Button icon="pi pi-pencil" rounded text onClick={() => handleEdit(rowData)} />
-                <Button icon="pi pi-trash" severity="danger" rounded text onClick={() => handleDelete(rowData)} />
-            </div>
-        );
-    };
+    const textEditor = (options: ColumnEditorOptions) => (
+        <InputText type="text" value={options.value} onChange={(e) => options.editorCallback?.(e.target.value)} />
+    );
 
-    const leftToolbarTemplate = () => {
-        return (
-            <div className="flex gap-2">
-                <Button label="Nuevo" icon="pi pi-plus" onClick={handleNew} />
-                <Button label="Eliminar" icon="pi pi-trash" severity="danger" onClick={handleDeleteSelected} />
-            </div>
-        );
-    };
+    const treeSelectEditor = (options: ColumnEditorOptions) => (
+        <TreeSelect
+            value={options.value}
+            onChange={(e) => options.editorCallback?.(e.value)}
+            options={generoOptions}
+            placeholder="Selecciona género"
+        />
+    );
 
-    const rightToolbarTemplate = () => {
-        return (
-            <Button label="Exportar" icon="pi pi-upload" severity="success" onClick={() => dt.current.exportCSV()} />
-        );
-    };
-
-    const header = (
-        <div className="flex justify-between items-center">
-            <h5 className="m-0">Listado de Personas</h5>
-            <span className="p-input-icon-left">
-                <i className="pi pi-search" />
-                <input
-                    type="text"
-                    className="p-inputtext p-component"
-                    placeholder="Buscar..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+    const InputField: React.FC<InputFieldProps> = ({ id, label, type, value, onChange }) => (
+        <div className="mt-4">
+            <FloatLabel>
+                <InputText
+                    id={id}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    style={{ textTransform: 'none' }}
+                    className="w-full rounded-md border border-gray-300 p-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
-            </span>
+                <label htmlFor={id} className="mb-2 block font-semibold text-gray-700">
+                    {label}
+                </label>
+            </FloatLabel>
         </div>
     );
 
-    const globalFilter = search;
+    const TreeSelectField: React.FC<TreeSelectFieldProps> = ({ id, label, value, onChange }) => (
+        <div className="mt-4">
+            <FloatLabel>
+                <TreeSelect
+                    inputId={id}
+                    value={value}
+                    onChange={onChange}
+                    options={generoOptions}
+                    placeholder="Selecciona género"
+                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                <label htmlFor={id} className="mb-2 block font-semibold text-gray-700">
+                    {label}
+                </label>
+            </FloatLabel>
+        </div>
+    );
 
     const headerElement = (
-        <div className="inline-flex align-items-center justify-content-center gap-2">
-            <span className="font-bold white-space-nowrap">Nueva Persona</span>
+        <div className="align-items-center justify-content-center inline-flex gap-2">
+            <span className="white-space-nowrap font-bold">Registrar Persona</span>
         </div>
     );
 
     const footerContent = (
         <div>
-            <Button label="Ok" icon="pi pi-check" onClick={() => setVisible(false)} autoFocus />
+            <Button label={id ? 'Editar' : 'Crear'} onClick={() => savePerson()}/>
         </div>
     );
-
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Personas" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="mb-4">
-                    <h1 className="flex items-center gap-2 text-2xl font-bold">
-                        <i className="fas fa-user-friends"></i>
-                        <Users />
-                        MANTENIMIENTO DE PERSONAS
-                    </h1>
+
+            <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-100 p-8 shadow-lg">
+                <div className="flex items-center gap-4 border-b pb-4">
+                    <i className="fas fa-user-friends text-2xl text-indigo-600" />
+                    <Users />
+                    <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Mantenimiento de Personas</h1>
                 </div>
-                <div className="row mb-3">
-                    <div className="col-md-6">
-                        <label htmlFor="buscar">Buscar</label>
-                        <input
-                            type="text"
-                            id="buscar"
-                            className="form-control"
-                            placeholder="Buscar por Id/Nombres/Apellidos/Sexo/Correo"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <div className="col-md-6 d-flex justify-content-md-end justify-content-start align-items-end mt-md-0 mt-3">
-                        <Button label="Show" icon="pi pi-external-link" onClick={() => setVisible(true)} />
-                        <Dialog visible={visible} modal header={headerElement} footer={footerContent} style={{ width: '50rem' }} onHide={() => {if (!visible) return; setVisible(false); }}>
-                            <p className="m-0">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                                consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                            </p>
-                        </Dialog>
-                    </div>
+
+                <div className="mb-6 flex items-center justify-between">
+                    <IconField iconPosition="left">
+                        <InputIcon className="pi pi-search"> </InputIcon>
+                        <InputText placeholder="Buscar persona..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </IconField>
+
+                    <Button
+                        label="Crear Persona"
+                        className="bg-indigo-600 text-white shadow-lg hover:bg-indigo-700"
+                        onClick={() => {
+                            resetForm();
+                            setVisible(true);
+                        }}
+                    />
                 </div>
-                <div className="table-container">
-                    <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
+
+                <div className="rounded-xl bg-white p-6 shadow-xl">
                     <DataTable
-                        ref={dt}
-                        value={personas}
-                        selection={selectedProducts}
-                        onSelectionChange={(e) => setSelectedProducts(e.value)}
+                        value={filteredPersonas}
+                        tableStyle={{ minWidth: '50rem' }}
+                        editMode="row"
                         dataKey="id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} personas"
-                        globalFilter={globalFilter}
-                        header={header}
-                        responsiveLayout="scroll"
-                        emptyMessage="No se encontraron personas."
+                        onRowEditComplete={onRowEditComplete}
                     >
-                        <Column selectionMode="multiple" exportable={false} />
-                        <Column field="nombres" header="Nombres" sortable style={{ minWidth: '12rem' }} />
-                        <Column field="apellido" header="Apellido" sortable style={{ minWidth: '12rem' }} />
-                        <Column field="correo" header="Correo Electrónico" sortable style={{ minWidth: '16rem' }} />
-                        <Column field="sexo" header="Sexo" sortable style={{ minWidth: '8rem' }} />
-                        <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '10rem' }} />
+                        <Column field="id" header="ID" className="font-medium text-gray-700" />
+                        <Column field="apellidos" header="Apellidos" editor={textEditor} />
+                        <Column field="nombres" header="Nombres" editor={textEditor} />
+                        <Column field="sexo" header="Género" editor={treeSelectEditor} />
+                        <Column field="correo" header="Correo Personal" editor={textEditor} />
+                        <Column
+                            header="Acciones"
+                            body={(rowData) => (
+                                <div className="flex items-center justify-center gap-2">
+                                    <Button
+                                        icon="pi pi-pencil"
+                                        className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
+                                        onClick={() => handleEdit(rowData)}
+                                    />
+                                </div>
+                            )}
+                        />
                     </DataTable>
                 </div>
+
+                <Dialog
+                    visible={visible}
+                    modal
+                    header={headerElement}
+                    footer={footerContent}
+                    style={{ width: '50rem' }}
+                    onHide={() => setVisible(false)}
+                >
+                    <div className="space-y-5 rounded-lg border border-gray-300 p-8 shadow-2xl">
+                        <h2 className="text-center text-3xl font-semibold text-gray-800">Ingrese los datos de la persona</h2>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div className="mt-4">
+                                <FloatLabel>
+                                    <InputText
+                                        id="apellidoPaterno"
+                                        type="text"
+                                        value={apellidoPaterno}
+                                        onChange={(e) => setApellidoPaterno(e.target.value)}
+                                        style={{ textTransform: 'none' }}
+                                        className="w-full rounded-md border border-gray-300 p-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    />
+                                    <label htmlFor="apellidoPaterno" className="mb-2 block font-semibold text-gray-700">
+                                        Primer Apellido
+                                    </label>
+                                </FloatLabel>
+                            </div>
+                            {/*<InputField
+                                id="apellidoPaterno"
+                                label="Primer Apellido"
+                                type="text"
+                                value={apellidoPaterno}
+                                onChange={(e) => setApellidoPaterno(e.target.value)}
+                            />*/}
+                            <InputField
+                                id="apellidoMaterno"
+                                label="Segundo Apellido"
+                                type="text"
+                                value={apellidoMaterno}
+                                onChange={(e) => setApellidoMaterno(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <InputField id="nombres" label="Nombres" type="text" value={nombres} onChange={(e) => setNombres(e.target.value)} />
+                            <TreeSelectField
+                                id="genero"
+                                label="Género"
+                                value={genero}
+                                onChange={(e) => {
+                                    if (typeof e.value === 'string') {
+                                        setGenero(e.value);
+                                    } else {
+                                        setGenero(null);
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6 sm:grid-cols-1">
+                            <InputField
+                                id="correoPersonal"
+                                label="Correo Electrónico"
+                                type="email"
+                                value={correoPersonal}
+                                onChange={(e) => setCorreoPersonal(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <InputField id="dni" label="DNI" type="text" value={dni} onChange={(e) => setDni(e.target.value)} />
+                            <InputField id="celular" label="Celular" type="tel" value={celular} onChange={(e) => setCelular(e.target.value)} />
+                        </div>
+                    </div>
+                </Dialog>
             </div>
         </AppLayout>
     );

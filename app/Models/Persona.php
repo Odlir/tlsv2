@@ -24,6 +24,7 @@ class Persona extends Model
         'edit_user_id',
     ];
 
+
     public static function boot()
     {
         parent::boot();

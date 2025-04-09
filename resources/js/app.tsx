@@ -1,5 +1,4 @@
 import '../css/app.css';
-import 'primereact/resources/themes/lara-dark-indigo/theme.css';
 import 'primeicons/primeicons.css';
 
 import { createInertiaApp } from '@inertiajs/react';
@@ -8,6 +7,15 @@ import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+const loadTheme = () => {
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    if (isDarkMode) {
+        import('primereact/resources/themes/lara-dark-indigo/theme.css');
+    } else {
+        import('primereact/resources/themes/lara-light-indigo/theme.css');
+    }
+};
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -24,3 +32,17 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+loadTheme();
+
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+            loadTheme();
+        }
+    });
+});
+
+observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+});

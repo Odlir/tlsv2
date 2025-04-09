@@ -7,6 +7,7 @@ use App\Http\Controllers\EmpresaSucursalController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReporteController;
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,6 +30,12 @@ Route::resource('personas', PersonaController::class);
 Route::resource('empresas', EmpresaController::class);
 Route::resource('empresa_sucursal', EmpresaSucursalController::class);
 Route::resource('encuestas', EncuestaController::class);
+Route::resource('catalogues', CatalogueController::class);
+Route::resource('reportes', ReporteController::class);
+Route::resource('anual', AnualController::class);
+
+
+Route::get('/reporte_anual', [ReporteController::class, 'reporte_anual']);
 
 
 Route::post('/encuestas/importAlumnos', [EncuestaController::class, 'importAlumnos']);

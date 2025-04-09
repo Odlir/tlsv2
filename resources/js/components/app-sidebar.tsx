@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, Home, Users, School, Calendar, BarChart, FileText} from 'lucide-react';
+import { BookOpen, Folder, Home, Users, School, Edit, BarChart, FileText} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -26,16 +26,16 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Programar Encuestas',
         href: '/encuestas',
-        icon: Calendar,
+        icon: Edit,
     },
     {
         title: 'Reportes',
-        href: '/encuestas',
+        href: '/reportes',
         icon: BarChart,
     },
     {
         title: 'Rep.Anual',
-        href: '/encuestas',
+        href: '/reporte_anual',
         icon: FileText,
     },
 ];
