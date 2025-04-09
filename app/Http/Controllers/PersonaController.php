@@ -10,7 +10,7 @@ class PersonaController extends Controller
 {
     public function index(Request $request)
     {
-        $paginate = $request->input('paginate') ?? 5;
+        $paginate = $request->input('paginate') ?? 20;
         $offset = $request->input('offset') * $paginate;
         $searchValue = $request->input('search');
 
@@ -30,7 +30,7 @@ class PersonaController extends Controller
         $data = $dataQuery
             ->skip($offset)
             ->take($paginate)
-            ->orderBy('id', 'desc')
+            ->orderBy('id', 'asc')
             ->get();
 
         return Inertia::render('personas/personas', [
@@ -98,6 +98,23 @@ class PersonaController extends Controller
         $persona->save();
 
         return response()->json($persona, 200);
+    }
+
+    public function destroy($id)
+    {
+        $persona = Persona::findOrFail($id);
+        try {
+            $persona->estado = 0;
+            $persona->save();
+            return response()->json([
+                'message' => 'Persona desactivada correctamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al desactivar la persona.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
