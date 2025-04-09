@@ -13,10 +13,8 @@ import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import { InputText } from 'primereact/inputtext';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
-import { TreeSelect } from 'primereact/treeselect';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-
 import { ColumnEditorOptions } from 'primereact/column';
 import { DataTableRowEditCompleteEvent } from 'primereact/datatable';
 
@@ -56,65 +54,76 @@ interface ErrorsInterface {
     correoPersonal?: string;
     dni?: string;
     celular?: string;
+    [key: string]: string | undefined;
 }
+
+const generoOptions = [
+    { label: 'Masculino', value: 'MASCULINO' },
+    { label: 'Femenino', value: 'FEMENINO' },
+];
 
 export default function Personas({ personas }: PersonasProps) {
     const [visible, setVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedPersonas, setSelectedPersonas] = useState<Persona[]>(personas);
     const [id, setId] = useState<number | null>(null);
-    const [apellidoPaterno, setApellidoPaterno] = useState('');
-    const [apellidoMaterno, setApellidoMaterno] = useState('');
-    const [nombres, setNombres] = useState('');
-    const [genero, setGenero] = useState<string | null>(null);
-    const [correoPersonal, setCorreoPersonal] = useState('');
-    const [dni, setDni] = useState('');
-    const [celular, setCelular] = useState('');
+    const [formData, setFormData] = useState({
+        apellidoPaterno: '',
+        apellidoMaterno: '',
+        nombres: '',
+        genero: null as string | null,
+        correoPersonal: '',
+        dni: '',
+        celular: '',
+    });
     const [searchTerm, setSearchTerm] = useState('');
     const [errors, setErrors] = useState<ErrorsInterface>({});
-    const [first, setFirst] = useState(0);
-    const [rows, setRows] = useState(5);
+    const [pagination, setPagination] = useState({
+        first: 0,
+        rows: 5,
+    });
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
-        setFirst(event.first);
-        setRows(event.rows);
+        setPagination({
+            first: event.first,
+            rows: event.rows,
+        });
     };
-
-    const generoOptions = [
-        { label: 'Masculino', value: 'MASCULINO' },
-        { label: 'Femenino', value: 'FEMENINO' },
-    ];
 
     const onRowEditComplete = (e: DataTableRowEditCompleteEvent) => {
-        const _personas = [...selectedPersonas];
+        const updatedPersonas = [...selectedPersonas];
         const { newData, index } = e;
-        _personas[index] = newData as Persona;
-        setSelectedPersonas(_personas);
-    };
-
-    const handleEdit = (rowData: Persona) => {
-        setApellidoPaterno(rowData.apellido_paterno.split(' ')[0]);
-        setApellidoMaterno(rowData.apellido_materno.split(' ')[0]);
-        setNombres(rowData.nombres);
-        setGenero(rowData.sexo);
-        setCorreoPersonal(rowData.correo);
-        setDni(rowData.dni);
-        setCelular(rowData.celular);
-        setId(rowData.id ? Number(rowData.id) : null);
-        setIsEditing(true);
-        setVisible(true);
+        updatedPersonas[index] = newData as Persona;
+        setSelectedPersonas(updatedPersonas);
     };
 
     const handleView = (rowData: Persona) => {
-        setApellidoPaterno(rowData.apellido_paterno.split(' ')[0]);
-        setApellidoMaterno(rowData.apellido_materno.split(' ')[0]);
-        setNombres(rowData.nombres);
-        setGenero(rowData.sexo);
-        setCorreoPersonal(rowData.correo);
-        setDni(rowData.dni);
-        setCelular(rowData.celular);
+        setFormData({
+            apellidoPaterno: rowData.apellido_paterno.split(' ')[0],
+            apellidoMaterno: rowData.apellido_materno.split(' ')[0],
+            nombres: rowData.nombres,
+            genero: rowData.sexo,
+            correoPersonal: rowData.correo,
+            dni: rowData.dni,
+            celular: rowData.celular,
+        });
         setId(rowData.id ? Number(rowData.id) : null);
         setIsEditing(false);
+        setVisible(true);
+    };
+
+    const handleEdit = (rowData: Persona) => {
+        setFormData({
+            apellidoPaterno: rowData.apellido_paterno.split(' ')[0],
+            apellidoMaterno: rowData.apellido_materno.split(' ')[0],
+            nombres: rowData.nombres,
+            genero: rowData.sexo,
+            correoPersonal: rowData.correo,
+            dni: rowData.dni,
+            celular: rowData.celular,
+        });
+        setId(rowData.id ? Number(rowData.id) : null);
+        setIsEditing(true);
         setVisible(true);
     };
 
@@ -156,23 +165,13 @@ export default function Personas({ personas }: PersonasProps) {
             return;
         }
 
-        const personData = {
-            apellidoPaterno,
-            apellidoMaterno,
-            nombres,
-            genero,
-            correoPersonal,
-            dni,
-            celular,
-        };
-
         try {
             if (id) {
-                await axios.put(`/personas/${id}`, personData, {
+                await axios.put(`/personas/${id}`, formData, {
                     headers: { 'Content-Type': 'application/json' },
                 });
             } else {
-                await axios.post('/personas', personData, {
+                await axios.post('/personas', formData, {
                     headers: { 'Content-Type': 'application/json' },
                 });
             }
@@ -182,35 +181,47 @@ export default function Personas({ personas }: PersonasProps) {
         }
     };
 
-    const filteredPersonas = selectedPersonas
-        .filter((persona) => {
-            const fullName =
-                `${persona.apellido_paterno} ${persona.apellido_materno} ${persona.nombres} ${persona.sexo} ${persona.correo}`.toLowerCase();
-            return fullName.includes(searchTerm.toLowerCase());
-        })
-        .sort((a, b) => a.id - b.id);
-
     const resetForm = () => {
-        setApellidoPaterno('');
-        setApellidoMaterno('');
-        setNombres('');
-        setGenero(null);
-        setCorreoPersonal('');
-        setDni('');
-        setCelular('');
+        setFormData({
+            apellidoPaterno: '',
+            apellidoMaterno: '',
+            nombres: '',
+            genero: null,
+            correoPersonal: '',
+            dni: '',
+            celular: '',
+        });
         setId(null);
     };
 
+    const validateFields = () => {
+        const newErrors: ErrorsInterface = {};
+        if (!formData.apellidoPaterno) newErrors.apellidoPaterno = 'Completa este campo';
+        if (!formData.apellidoMaterno) newErrors.apellidoMaterno = 'Completa este campo';
+        if (!formData.nombres) newErrors.nombres = 'Completa este campo';
+        if (!formData.genero) newErrors.genero = 'Selecciona un género';
+        if (!formData.correoPersonal) newErrors.correoPersonal = 'Completa este campo';
+        if (!formData.dni) newErrors.dni = 'Completa este campo';
+        if (!formData.celular) newErrors.celular = 'Completa este campo';
+        setErrors(newErrors);
+    };
+
     const textEditor = (options: ColumnEditorOptions) => (
-        <InputText type="text" value={options.value} onChange={(e) => options.editorCallback?.(e.target.value)} />
+        <InputText
+            type="text"
+            value={options.value}
+            onChange={(e) => options.editorCallback?.(e.target.value)}
+            className="w-full"
+        />
     );
 
     const treeSelectEditor = (options: ColumnEditorOptions) => (
-        <TreeSelect
+        <Dropdown
             value={options.value}
             onChange={(e) => options.editorCallback?.(e.value)}
             options={generoOptions}
             placeholder="Selecciona género"
+            className="w-full"
         />
     );
 
@@ -222,22 +233,21 @@ export default function Personas({ personas }: PersonasProps) {
                     value={value}
                     onChange={(e) => {
                         onChange(e);
-                        if (errors && errors[id]) {
+                        if (errors?.[id] && setErrors) {
                             setErrors({ ...errors, [id]: undefined });
                         }
                     }}
                     options={generoOptions}
                     placeholder="Selecciona género"
                     disabled={!isEditing}
-                    className="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    style={{
-                        borderColor: errors && errors[id] ? '#ef4444' : '#d1d5db',
-                    }}
+                    className={`w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                        errors?.[id] ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
                 <label htmlFor={id} className="mb-2 block font-semibold text-gray-700">
                     {label}
                 </label>
-                {errors && errors[id] && (
+                {errors?.[id] && (
                     <div className="absolute top-0 right-0 mt-2 mr-2">
                         <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
                             <span className="mr-2 text-orange-500">
@@ -251,33 +261,39 @@ export default function Personas({ personas }: PersonasProps) {
         </div>
     );
 
-    const headerElement = (
-        <div className="align-items-center justify-content-center inline-flex gap-2">
-            <span className="white-space-nowrap font-bold">Registrar Persona</span>
+    const dialogHeader = (
+        <div className="inline-flex items-center justify-center gap-2">
+            <span className="whitespace-nowrap font-bold">Registrar Persona</span>
         </div>
     );
 
-    const footerContent = (
-        <div className="flex justify-end gap-3">{isEditing ? <Button label={id ? 'Editar' : 'Crear'} onClick={savePerson} /> : ''}</div>
+    const dialogFooter = (
+        <div className="flex justify-end gap-3">
+            {isEditing && (
+                <Button
+                    label={id ? 'Editar' : 'Crear'}
+                    onClick={savePerson}
+                    className="bg-indigo-600 text-white hover:bg-indigo-700"
+                />
+            )}
+        </div>
     );
 
-    const validateFields = () => {
-        const newErrors: ErrorsInterface = {};
-        if (!apellidoPaterno) newErrors.apellidoPaterno = 'Completa este campo';
-        if (!apellidoMaterno) newErrors.apellidoMaterno = 'Completa este campo';
-        if (!nombres) newErrors.nombres = 'Completa este campo';
-        if (!genero) newErrors.genero = 'Selecciona un género';
-        if (!correoPersonal) newErrors.correoPersonal = 'Completa este campo';
-        if (!dni) newErrors.dni = 'Completa este campo';
-        if (!celular) newErrors.celular = 'Completa este campo';
-        setErrors(newErrors);
-    };
+    const filteredPersonas = selectedPersonas
+        .filter((persona) => {
+            const fullName = `${persona.apellido_paterno} ${persona.apellido_materno} ${persona.nombres} ${persona.sexo} ${persona.correo}`.toLowerCase();
+            return fullName.includes(searchTerm.toLowerCase());
+        })
+        .sort((a, b) => a.id - b.id);
+
+    const paginatedPersonas = filteredPersonas.slice(pagination.first, pagination.first + pagination.rows);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Personas" />
 
             <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-white p-8 shadow-lg">
+
                 <div className="flex items-center gap-4 border-b pb-4">
                     <i className="fas fa-user-friends text-2xl text-indigo-600" />
                     <Users />
@@ -285,18 +301,19 @@ export default function Personas({ personas }: PersonasProps) {
                 </div>
 
                 <div className="mb-6 flex items-center justify-between">
-                    <IconField iconPosition="left">
+                    <IconField iconPosition="left" className="w-1/2">
                         <InputIcon className="pi pi-search" />
                         <InputText
                             placeholder="Buscar persona..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </IconField>
 
                     <Button
                         label="Crear Persona"
+                        icon="pi pi-plus"
                         className="bg-indigo-600 text-white shadow-md transition duration-300 hover:bg-indigo-700"
                         onClick={() => {
                             resetForm();
@@ -308,13 +325,19 @@ export default function Personas({ personas }: PersonasProps) {
 
                 <div className="rounded-xl bg-gray-50 p-6 shadow-md">
                     <DataTable
-                        value={filteredPersonas.slice(first, first + rows)}
+                        value={paginatedPersonas}
                         tableStyle={{ minWidth: '50rem' }}
                         editMode="row"
                         dataKey="id"
                         onRowEditComplete={onRowEditComplete}
+                        paginator={false}
                     >
-                        <Column field="id" header="ID" body={(_, { rowIndex }) => first + rowIndex + 1} className="font-medium text-gray-700" />
+                        <Column
+                            field="id"
+                            header="ID"
+                            body={(_, { rowIndex }) => pagination.first + rowIndex + 1}
+                            className="font-medium text-gray-700"
+                        />
                         <Column field="apellidos" header="Apellidos" editor={textEditor} />
                         <Column field="nombres" header="Nombres" editor={textEditor} />
                         <Column field="sexo" header="Género" editor={treeSelectEditor} />
@@ -327,60 +350,70 @@ export default function Personas({ personas }: PersonasProps) {
                                         icon="pi pi-eye"
                                         className="rounded-md bg-green-500 p-2 text-white transition duration-300 hover:bg-green-600"
                                         onClick={() => handleView(rowData)}
+                                        tooltip="Ver"
+                                        tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-pencil"
                                         className="rounded-md bg-yellow-500 p-2 text-white transition duration-300 hover:bg-yellow-600"
                                         onClick={() => handleEdit(rowData)}
+                                        tooltip="Editar"
+                                        tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-trash"
                                         className="rounded-md bg-red-500 p-2 text-white transition duration-300 hover:bg-red-600"
                                         onClick={() => handleDelete(rowData)}
+                                        tooltip="Eliminar"
+                                        tooltipOptions={{ position: 'top' }}
                                     />
                                 </div>
                             )}
                         />
                     </DataTable>
+
                     <Paginator
-                        first={first}
-                        rows={rows}
+                        first={pagination.first}
+                        rows={pagination.rows}
                         totalRecords={filteredPersonas.length}
                         rowsPerPageOptions={[5, 10, 20]}
                         onPageChange={onPageChange}
+                        className="mt-4"
                     />
                 </div>
 
                 <Dialog
                     visible={visible}
                     modal
-                    header={headerElement}
-                    footer={footerContent}
+                    header={dialogHeader}
+                    footer={dialogFooter}
                     style={{ width: '50rem' }}
                     onHide={() => setVisible(false)}
+                    className="rounded-lg"
                 >
                     <div className="space-y-5 rounded-lg border border-gray-300 p-8 shadow-2xl">
-                        <h2 className="text-center text-3xl font-semibold text-gray-800">Ingrese los datos de la persona</h2>
+                        <h2 className="text-center text-3xl font-semibold text-gray-800">
+                            {isEditing ? (id ? 'Editar Persona' : 'Crear Nueva Persona') : 'Detalles de la Persona'}
+                        </h2>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
                             <div className="relative mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="apellidoPaterno"
                                         type="text"
-                                        value={apellidoPaterno}
+                                        value={formData.apellidoPaterno}
                                         onChange={(e) => {
-                                            setApellidoPaterno(e.target.value);
+                                            setFormData({...formData, apellidoPaterno: e.target.value});
                                             if (errors.apellidoPaterno) {
                                                 setErrors({ ...errors, apellidoPaterno: undefined });
                                             }
                                         }}
                                         disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.apellidoPaterno ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.apellidoPaterno ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
                                     <label htmlFor="apellidoPaterno" className="mb-2 block font-semibold text-gray-700">
                                         Primer Apellido
@@ -394,27 +427,26 @@ export default function Personas({ personas }: PersonasProps) {
                                                 <span className="text-gray-700">{errors.apellidoPaterno}</span>
                                             </div>
                                         </div>
-                                    )}{' '}
+                                    )}
                                 </FloatLabel>
                             </div>
+
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="apellidoMaterno"
                                         type="text"
-                                        value={apellidoMaterno}
+                                        value={formData.apellidoMaterno}
                                         onChange={(e) => {
-                                            setApellidoMaterno(e.target.value);
+                                            setFormData({...formData, apellidoMaterno: e.target.value});
                                             if (errors.apellidoMaterno) {
                                                 setErrors({ ...errors, apellidoMaterno: undefined });
                                             }
                                         }}
                                         disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.apellidoMaterno ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.apellidoMaterno ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
                                     <label htmlFor="apellidoMaterno" className="mb-2 block font-semibold text-gray-700">
                                         Segundo Apellido
@@ -428,30 +460,29 @@ export default function Personas({ personas }: PersonasProps) {
                                                 <span className="text-gray-700">{errors.apellidoMaterno}</span>
                                             </div>
                                         </div>
-                                    )}{' '}
+                                    )}
                                 </FloatLabel>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="nombres"
                                         type="text"
-                                        value={nombres}
+                                        value={formData.nombres}
                                         onChange={(e) => {
-                                            setNombres(e.target.value);
+                                            setFormData({...formData, nombres: e.target.value});
                                             if (errors.nombres) {
                                                 setErrors({ ...errors, nombres: undefined });
                                             }
                                         }}
                                         disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.nombres ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.nombres ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
                                     <label htmlFor="nombres" className="mb-2 block font-semibold text-gray-700">
                                         Nombres
@@ -465,18 +496,18 @@ export default function Personas({ personas }: PersonasProps) {
                                                 <span className="text-gray-700">{errors.nombres}</span>
                                             </div>
                                         </div>
-                                    )}{' '}
+                                    )}
                                 </FloatLabel>
                             </div>
+
                             <TreeSelectField
                                 id="genero"
                                 label="Género"
-                                value={genero}
+                                value={formData.genero}
                                 onChange={(e) => {
-                                    if (typeof e.value === 'string') {
-                                        setGenero(e.value);
-                                    } else {
-                                        setGenero(null);
+                                    setFormData({...formData, genero: e.value});
+                                    if (errors.genero) {
+                                        setErrors({ ...errors, genero: undefined });
                                     }
                                 }}
                                 errors={errors}
@@ -484,62 +515,57 @@ export default function Personas({ personas }: PersonasProps) {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <div className="mt-4">
-                                <FloatLabel>
-                                    <InputText
-                                        id="correoPersonal"
-                                        type="text"
-                                        value={correoPersonal}
-                                        onChange={(e) => {
-                                            setCorreoPersonal(e.target.value);
-                                            if (errors.correoPersonal) {
-                                                setErrors({ ...errors, correoPersonal: undefined });
-                                            }
-                                        }}
-                                        disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.correoPersonal ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
-                                    />
-                                    <label htmlFor="correoPersonal" className="mb-2 block font-semibold text-gray-700">
-                                        Correo Personal
-                                    </label>
-                                    {errors.correoPersonal && (
-                                        <div className="absolute top-0 right-0 mt-2 mr-2">
-                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
-                                                <span className="mr-2 text-orange-500">
-                                                    <i className="pi pi-exclamation-triangle"></i>
-                                                </span>
-                                                <span className="text-gray-700">{errors.correoPersonal}</span>
-                                            </div>
+                        <div className="mt-4">
+                            <FloatLabel>
+                                <InputText
+                                    id="correoPersonal"
+                                    type="email"
+                                    value={formData.correoPersonal}
+                                    onChange={(e) => {
+                                        setFormData({...formData, correoPersonal: e.target.value});
+                                        if (errors.correoPersonal) {
+                                            setErrors({ ...errors, correoPersonal: undefined });
+                                        }
+                                    }}
+                                    disabled={!isEditing}
+                                    className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                        errors.correoPersonal ? 'border-red-500' : 'border-gray-300'
+                                    }`}
+                                />
+                                <label htmlFor="correoPersonal" className="mb-2 block font-semibold text-gray-700">
+                                    Correo Personal
+                                </label>
+                                {errors.correoPersonal && (
+                                    <div className="absolute top-0 right-0 mt-2 mr-2">
+                                        <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                            <span className="mr-2 text-orange-500">
+                                                <i className="pi pi-exclamation-triangle"></i>
+                                            </span>
+                                            <span className="text-gray-700">{errors.correoPersonal}</span>
                                         </div>
-                                    )}{' '}
-                                </FloatLabel>
-                            </div>
+                                    </div>
+                                )}
+                            </FloatLabel>
                         </div>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="dni"
                                         type="text"
-                                        value={dni}
+                                        value={formData.dni}
                                         onChange={(e) => {
-                                            setDni(e.target.value);
+                                            setFormData({...formData, dni: e.target.value});
                                             if (errors.dni) {
                                                 setErrors({ ...errors, dni: undefined });
                                             }
                                         }}
                                         disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.dni ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.dni ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
                                     <label htmlFor="dni" className="mb-2 block font-semibold text-gray-700">
                                         DNI
@@ -553,27 +579,26 @@ export default function Personas({ personas }: PersonasProps) {
                                                 <span className="text-gray-700">{errors.dni}</span>
                                             </div>
                                         </div>
-                                    )}{' '}
+                                    )}
                                 </FloatLabel>
                             </div>
+
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="celular"
                                         type="text"
-                                        value={celular}
+                                        value={formData.celular}
                                         onChange={(e) => {
-                                            setCelular(e.target.value);
+                                            setFormData({...formData, celular: e.target.value});
                                             if (errors.celular) {
                                                 setErrors({ ...errors, celular: undefined });
                                             }
                                         }}
                                         disabled={!isEditing}
-                                        style={{
-                                            textTransform: 'none',
-                                            borderColor: errors.celular ? '#ef4444' : '#d1d5db',
-                                        }}
-                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.celular ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
                                     <label htmlFor="celular" className="mb-2 block font-semibold text-gray-700">
                                         Celular
@@ -587,7 +612,7 @@ export default function Personas({ personas }: PersonasProps) {
                                                 <span className="text-gray-700">{errors.celular}</span>
                                             </div>
                                         </div>
-                                    )}{' '}
+                                    )}
                                 </FloatLabel>
                             </div>
                         </div>
