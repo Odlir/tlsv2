@@ -231,7 +231,7 @@ export default function Personas({ personas }: PersonasProps) {
                     style={{
                         textTransform: 'none',
                     }}
-                    className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                    className={`w-full rounded-md border  shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
                         errors?.[id] ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                     }`}
                 />
@@ -507,7 +507,7 @@ export default function Personas({ personas }: PersonasProps) {
                             />
                         </div>
 
-                        <div className="mt-4">
+                        <div className="mt-8">
                             <FloatLabel>
                                 <InputText
                                     id="correoPersonal"
