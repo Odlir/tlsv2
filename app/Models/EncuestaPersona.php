@@ -7,7 +7,7 @@ use App\Traits\MyTrait;
 
 class EncuestaPersona extends Model
 {
-    protected $table = "encuesta_persona";
+    protected $table = "encuesta_personas";
 
     use MyTrait;
 
@@ -23,11 +23,11 @@ class EncuestaPersona extends Model
 
     public function persona()
     {
-        return $this->belongsTo('App\Persona');
+        return $this->belongsTo('App\Models\Persona');
     }
 
     public function encuesta() {
-        return $this->belongsTo('App\Encuesta');
+        return $this->belongsTo('App\Models\Encuesta');
     }
 
     public function respuestas()

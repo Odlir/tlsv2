@@ -4,6 +4,7 @@ use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EmpresaSucursalController;
+use App\Http\Controllers\EncuestaRespuestaController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\UserController;
@@ -33,11 +34,13 @@ Route::resource('encuestas', EncuestaController::class);
 Route::resource('catalogues', CatalogueController::class);
 Route::resource('reportes', ReporteController::class);
 Route::resource('anual', AnualController::class);
-
+Route::resource('encuestaRespuesta', EncuestaRespuestaController::class);
 
 Route::get('/reporte_anual', [ReporteController::class, 'reporte_anual']);
 
 Route::get('/getEmpresaSucursal', [EmpresaSucursalController::class, 'getEmpresaSucursal'])->name('getEmpresaSucursal');
+Route::get('/getEncuestas', [EncuestaController::class, 'getEncuestas'])->name('getEncuestas');
+Route::get('/getEstatusEncuesta', [EncuestaController::class, 'getEstatusEncuesta'])->name('getEstatusEncuesta');
 
 Route::post('/encuestas/importAlumnos', [EncuestaController::class, 'importAlumnos']);
 Route::get('/searchAlumnos', [EncuestaController::class, 'searchAlumnos']);
@@ -63,3 +66,8 @@ Route::get('/respuestas', [CatalogueController::class, 'getRespuestas'])->name('
 Route::get('/encuestas/checkIfSurveyIsAllowed/{id}', [EncuestaController::class, 'checkIfSurveyIsAllowed']);
 Route::post('/encuestas/saveAnswers', [EncuestaController::class, 'saveAnswers']);
 Route::get('/encuestas/descargarReporte/{encuesta_persona_id}', [EncuestaController::class, 'descargarReporte']);
+
+Route::get('/test-intereses/{encuestaId}/{personaId}', [ReporteController::class, 'generarReporteIntereses'])->name('reportes.intereses');
+Route::get('/exportar/intereses/{encuestaId}/{personaId}', [ReporteController::class, 'exportarReporteIntereses'])
+    ->name('reportes.exportar.intereses');
+Route::get('/test-consolidados/{encuestaId}/{personaId}', [ReporteController::class, 'generarReporteConsolidados'])->name('reportes.consolidados');

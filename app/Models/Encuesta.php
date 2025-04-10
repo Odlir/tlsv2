@@ -66,6 +66,6 @@ class Encuesta extends Model
 
     public function personas()
     {
-        return $this->belongsToMany('App\Models\Persona', 'encuesta_persona')->withPivot(["id", "estado", "completada"]);
+        return $this->belongsToMany('App\Models\Persona', 'encuesta_personas')->withPivot(["id", "estado", "completada"]);
     }
 }
