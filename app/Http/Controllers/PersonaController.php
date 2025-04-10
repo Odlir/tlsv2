@@ -64,7 +64,7 @@ class PersonaController extends Controller
         $persona->anio = date('Y');
         $persona->rol_id = 2;
         $persona->insert_user_id = auth()->id();
-        $persona->estado ='1';
+        $persona->estado = '1';
         $persona->save();
         return response()->json($persona, 201);
     }

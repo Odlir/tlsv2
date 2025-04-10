@@ -31,11 +31,15 @@ class Empresa extends Model
         parent::boot();
 
         static::saving(function ($model) {
-            foreach (['razon_social', 'contacto'] as $campo) {
-                $valor = $model->sinTilde($campo, $model->$campo);
-                $valor = $model->setUpperCase($campo, $valor);
-                $model->$campo = $valor;
-            }
+            $model->razon_social = $model->sinTilde('razon_social', $model->razon_social);
+            $model->contacto = $model->sinTilde('contacto', $model->contacto);
+            $model->email = $model->sinTilde('email', $model->email);
+            $model->telefono = $model->sinTilde('telefono', $model->telefono);
+            $model->sede = $model->sinTilde('sede', $model->sede);
+            $model->codigo = $model->sinTilde('codigo', $model->codigo);
+            $model->nivel = $model->sinTilde('nivel', $model->nivel);
+            $model->gestion = $model->sinTilde('gestion', $model->gestion);
+            $model->gestion_departamento = $model->sinTilde('gestion_departamento', $model->gestion_departamento);
         });
     }
 

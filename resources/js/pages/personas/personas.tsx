@@ -4,8 +4,8 @@ import { Head } from '@inertiajs/react';
 import axios from 'axios';
 import { Users } from 'lucide-react';
 import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { Column, ColumnEditorOptions } from 'primereact/column';
+import { DataTable, DataTableRowEditCompleteEvent } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { FloatLabel } from 'primereact/floatlabel';
@@ -15,8 +15,6 @@ import { InputText } from 'primereact/inputtext';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-import { ColumnEditorOptions } from 'primereact/column';
-import { DataTableRowEditCompleteEvent } from 'primereact/datatable';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Personas', href: '/personas' }];
 
@@ -54,6 +52,7 @@ interface ErrorsInterface {
     correoPersonal?: string;
     dni?: string;
     celular?: string;
+
     [key: string]: string | undefined;
 }
 
@@ -207,23 +206,9 @@ export default function Personas({ personas }: PersonasProps) {
     };
 
     const textEditor = (options: ColumnEditorOptions) => (
-        <InputText
-            type="text"
-            value={options.value}
-            onChange={(e) => options.editorCallback?.(e.target.value)}
-            className="w-full"
-        />
+        <InputText type="text" value={options.value} onChange={(e) => options.editorCallback?.(e.target.value)} className="w-full" />
     );
 
-    const treeSelectEditor = (options: ColumnEditorOptions) => (
-        <Dropdown
-            value={options.value}
-            onChange={(e) => options.editorCallback?.(e.value)}
-            options={generoOptions}
-            placeholder="Selecciona género"
-            className="w-full"
-        />
-    );
 
     const TreeSelectField: React.FC<TreeSelectFieldProps> = ({ id, label, value, onChange, errors, setErrors }) => (
         <div className="mt-4">
@@ -263,25 +248,20 @@ export default function Personas({ personas }: PersonasProps) {
 
     const dialogHeader = (
         <div className="inline-flex items-center justify-center gap-2">
-            <span className="whitespace-nowrap font-bold">Registrar Persona</span>
+            <span className="font-bold whitespace-nowrap">Registrar Persona</span>
         </div>
     );
 
     const dialogFooter = (
         <div className="flex justify-end gap-3">
-            {isEditing && (
-                <Button
-                    label={id ? 'Editar' : 'Crear'}
-                    onClick={savePerson}
-                    className="bg-indigo-600 text-white hover:bg-indigo-700"
-                />
-            )}
+            {isEditing && <Button label={id ? 'Editar' : 'Crear'} onClick={savePerson} className="bg-indigo-600 text-white hover:bg-indigo-700" />}
         </div>
     );
 
     const filteredPersonas = selectedPersonas
         .filter((persona) => {
-            const fullName = `${persona.apellido_paterno} ${persona.apellido_materno} ${persona.nombres} ${persona.sexo} ${persona.correo}`.toLowerCase();
+            const fullName =
+                `${persona.apellido_paterno} ${persona.apellido_materno} ${persona.nombres} ${persona.sexo} ${persona.correo}`.toLowerCase();
             return fullName.includes(searchTerm.toLowerCase());
         })
         .sort((a, b) => a.id - b.id);
@@ -293,7 +273,6 @@ export default function Personas({ personas }: PersonasProps) {
             <Head title="Personas" />
 
             <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-white p-8 shadow-lg">
-
                 <div className="flex items-center gap-4 border-b pb-4">
                     <i className="fas fa-user-friends text-2xl text-indigo-600" />
                     <Users />
@@ -340,7 +319,7 @@ export default function Personas({ personas }: PersonasProps) {
                         />
                         <Column field="apellidos" header="Apellidos" editor={textEditor} />
                         <Column field="nombres" header="Nombres" editor={textEditor} />
-                        <Column field="sexo" header="Género" editor={treeSelectEditor} />
+                        <Column field="sexo" header="Género" editor={textEditor} />
                         <Column field="correo" header="Correo Personal" editor={textEditor} />
                         <Column
                             header="Acciones"
@@ -348,21 +327,21 @@ export default function Personas({ personas }: PersonasProps) {
                                 <div className="flex items-center justify-center gap-2">
                                     <Button
                                         icon="pi pi-eye"
-                                        className="rounded-md bg-green-500 p-2 text-white transition duration-300 hover:bg-green-600"
+                                        className="p-button-rounded p-button-success p-button-text"
                                         onClick={() => handleView(rowData)}
                                         tooltip="Ver"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-pencil"
-                                        className="rounded-md bg-yellow-500 p-2 text-white transition duration-300 hover:bg-yellow-600"
+                                        className="p-button-rounded p-button-warning p-button-text"
                                         onClick={() => handleEdit(rowData)}
                                         tooltip="Editar"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-trash"
-                                        className="rounded-md bg-red-500 p-2 text-white transition duration-300 hover:bg-red-600"
+                                        className="p-button-rounded p-button-danger p-button-text"
                                         onClick={() => handleDelete(rowData)}
                                         tooltip="Eliminar"
                                         tooltipOptions={{ position: 'top' }}
@@ -391,13 +370,12 @@ export default function Personas({ personas }: PersonasProps) {
                     onHide={() => setVisible(false)}
                     className="rounded-lg"
                 >
-                    <div className="space-y-5 rounded-lg border border-gray-300 p-8 shadow-2xl">
+                    <div className="space-y-3 rounded-lg border border-gray-300 p-8 shadow-lg dark:border-zinc-700">
                         <h2 className="text-center text-3xl font-semibold text-gray-800">
                             {isEditing ? (id ? 'Editar Persona' : 'Crear Nueva Persona') : 'Detalles de la Persona'}
                         </h2>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-
                             <div className="relative mt-4">
                                 <FloatLabel>
                                     <InputText
@@ -405,7 +383,7 @@ export default function Personas({ personas }: PersonasProps) {
                                         type="text"
                                         value={formData.apellidoPaterno}
                                         onChange={(e) => {
-                                            setFormData({...formData, apellidoPaterno: e.target.value});
+                                            setFormData({ ...formData, apellidoPaterno: e.target.value });
                                             if (errors.apellidoPaterno) {
                                                 setErrors({ ...errors, apellidoPaterno: undefined });
                                             }
@@ -438,7 +416,7 @@ export default function Personas({ personas }: PersonasProps) {
                                         type="text"
                                         value={formData.apellidoMaterno}
                                         onChange={(e) => {
-                                            setFormData({...formData, apellidoMaterno: e.target.value});
+                                            setFormData({ ...formData, apellidoMaterno: e.target.value });
                                             if (errors.apellidoMaterno) {
                                                 setErrors({ ...errors, apellidoMaterno: undefined });
                                             }
@@ -466,7 +444,6 @@ export default function Personas({ personas }: PersonasProps) {
                         </div>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
@@ -474,7 +451,7 @@ export default function Personas({ personas }: PersonasProps) {
                                         type="text"
                                         value={formData.nombres}
                                         onChange={(e) => {
-                                            setFormData({...formData, nombres: e.target.value});
+                                            setFormData({ ...formData, nombres: e.target.value });
                                             if (errors.nombres) {
                                                 setErrors({ ...errors, nombres: undefined });
                                             }
@@ -505,7 +482,7 @@ export default function Personas({ personas }: PersonasProps) {
                                 label="Género"
                                 value={formData.genero}
                                 onChange={(e) => {
-                                    setFormData({...formData, genero: e.value});
+                                    setFormData({ ...formData, genero: e.value });
                                     if (errors.genero) {
                                         setErrors({ ...errors, genero: undefined });
                                     }
@@ -522,7 +499,7 @@ export default function Personas({ personas }: PersonasProps) {
                                     type="email"
                                     value={formData.correoPersonal}
                                     onChange={(e) => {
-                                        setFormData({...formData, correoPersonal: e.target.value});
+                                        setFormData({ ...formData, correoPersonal: e.target.value });
                                         if (errors.correoPersonal) {
                                             setErrors({ ...errors, correoPersonal: undefined });
                                         }
@@ -549,7 +526,6 @@ export default function Personas({ personas }: PersonasProps) {
                         </div>
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-
                             <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
@@ -557,7 +533,7 @@ export default function Personas({ personas }: PersonasProps) {
                                         type="text"
                                         value={formData.dni}
                                         onChange={(e) => {
-                                            setFormData({...formData, dni: e.target.value});
+                                            setFormData({ ...formData, dni: e.target.value });
                                             if (errors.dni) {
                                                 setErrors({ ...errors, dni: undefined });
                                             }
@@ -590,7 +566,7 @@ export default function Personas({ personas }: PersonasProps) {
                                         type="text"
                                         value={formData.celular}
                                         onChange={(e) => {
-                                            setFormData({...formData, celular: e.target.value});
+                                            setFormData({ ...formData, celular: e.target.value });
                                             if (errors.celular) {
                                                 setErrors({ ...errors, celular: undefined });
                                             }
