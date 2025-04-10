@@ -21,7 +21,8 @@ class Empresa extends Model
         'gestion',
         'gestion_departamento',
         'insert_user_id',
-        'edit_user_id'
+        'edit_user_id',
+        'estado'
     ];
 
     protected $appends = ['ubigeo_completo'];

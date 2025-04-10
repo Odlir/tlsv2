@@ -37,6 +37,7 @@ Route::resource('anual', AnualController::class);
 
 Route::get('/reporte_anual', [ReporteController::class, 'reporte_anual']);
 
+Route::get('/getEmpresaSucursal', [EmpresaSucursalController::class, 'getEmpresaSucursal'])->name('getEmpresaSucursal');
 
 Route::post('/encuestas/importAlumnos', [EncuestaController::class, 'importAlumnos']);
 Route::get('/searchAlumnos', [EncuestaController::class, 'searchAlumnos']);

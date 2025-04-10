@@ -38,4 +38,48 @@ class EncuestaController extends Controller
             'totalPages' => ceil($totalRecords / $paginate),
         ]);
     }
+
+
+    public function store(Request $request)
+    {
+        // Validación de los datos
+        $validated = $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date',
+            'seccion' => 'nullable|string',
+
+        ]);
+
+  /*      if ($request->hasFile('excelFile')) {
+            $file = $request->file('excelFile');
+
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $rows = [];
+            foreach ($sheet->getRowIterator(2) as $row) {
+                $rowData = [];
+                $cellIterator = $row->getCellIterator('A', 'H');
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $rowData[] = $cell->getFormattedValue();
+                }
+                $rows[] = $rowData;
+            }
+
+            dd($rows); // Ver los datos de las filas
+        }*/
+        $encuesta = new Encuesta();
+        $encuesta->fecha_inicio = $validated['fecha_inicio'];
+        $encuesta->fecha_fin = $validated['fecha_fin'];
+        $encuesta->seccion = $validated['seccion'] ?? null;
+        $encuesta->empresa_sucursal_id = 1;
+        $encuesta->insert_user_id = auth()->id();
+        $encuesta->estado = 1;
+        $encuesta->save();
+
+        return response()->json($encuesta, 201);
+    }
+
+
 }

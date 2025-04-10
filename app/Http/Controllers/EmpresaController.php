@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
-use App\Models\Persona;
+use App\Models\EmpresaSucursal;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -46,15 +46,14 @@ class EmpresaController extends Controller
         $validated = $request->validate([
             'razonSocial' => 'required|string',
             'contacto' => 'required|string',
-            'email' => 'required|email',
+            'email' => 'required|string',
             'telefono' => 'required|string',
             'sede' => 'required|string',
             'codigo' => 'required|string',
             'nivel' => 'required|string',
             'gestion' => 'required|string',
-            'gestionDepartamento' => 'required|string',
-            'departamento' => 'required|string',
-            'provincia' => 'required|string',
+            'gestion_departamento' => 'required|string',
+            'distrito' => 'required|string',
         ]);
 
         $empresa = new Empresa();
@@ -66,15 +65,20 @@ class EmpresaController extends Controller
         $empresa->codigo = $validated['codigo'];
         $empresa->nivel = $validated['nivel'];
         $empresa->gestion = $validated['gestion'];
-        $empresa->gestion_departamento = $validated['gestionDepartamento'];
-        $empresa->departamento = $validated['departamento'];
-        $empresa->provincia = $validated['provincia'];
-        $empresa->estado = '1';
-        $empresa->rol_id = '2';
+        $empresa->gestion_departamento = $validated['gestion_departamento'];
+        $empresa->ubigeo = $validated['distrito'];
         $empresa->insert_user_id = auth()->id();
+        $empresa->estado = 1;
 
         $empresa->save();
+        $empresaSucursal = new EmpresaSucursal();
+        $empresaSucursal->nombre = 'Sucursal Principal';  // O cualquier otro valor que desees
+        $empresaSucursal->empresa_id = $empresa->id;  // Asociar la sucursal con la empresa recién creada
+        $empresaSucursal->insert_user_id = auth()->id();
+        $empresaSucursal->edit_user_id = auth()->id();  // Puedes ajustar este valor según sea necesario
 
+        // Guardar la sucursal
+        $empresaSucursal->save();
         return response()->json($empresa, 201);
     }
 
@@ -83,16 +87,17 @@ class EmpresaController extends Controller
         $validated = $request->validate([
             'razonSocial' => 'required|string',
             'contacto' => 'required|string',
-            'email' => 'required|email',
+            'email' => 'required|string',
             'telefono' => 'required|string',
             'sede' => 'required|string',
             'codigo' => 'required|string',
             'nivel' => 'required|string',
             'gestion' => 'required|string',
-            'gestionDepartamento' => 'required|string',
-            'departamento' => 'required|string',
-            'provincia' => 'required|string',
+            'gestion_departamento' => 'required|string',
+            'distrito' => 'required|string',
         ]);
+
+
 
         $empresa = Empresa::find($id);
         if (!$empresa) {
@@ -106,28 +111,25 @@ class EmpresaController extends Controller
         $empresa->codigo = $validated['codigo'];
         $empresa->nivel = $validated['nivel'];
         $empresa->gestion = $validated['gestion'];
-        $empresa->gestion_departamento = $validated['gestionDepartamento'];
-        $empresa->departamento = $validated['departamento'];
-        $empresa->provincia = $validated['provincia'];
-
+        $empresa->gestion_departamento = $validated['gestion_departamento'];
+        $empresa->ubigeo = $validated['distrito'];
+        $empresa->insert_user_id = auth()->id();
         $empresa->save();
-
         return response()->json($empresa, 200);
     }
 
     public function destroy($id)
     {
-        $empresa = Persona::findOrFail($id);
+        $empresa = Empresa::findOrFail($id);
         try {
             $empresa->estado = 0;
-            $empresa->update_user_id = auth()->id();
             $empresa->save();
             return response()->json([
-                'message' => 'Persona desactivada correctamente.'
+                'message' => 'Empresa desactivada correctamente.'
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al desactivar la persona.',
+                'message' => 'Error al desactivar la empresa.',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -195,14 +195,29 @@ export default function Personas({ personas }: PersonasProps) {
 
     const validateFields = () => {
         const newErrors: ErrorsInterface = {};
+
         if (!formData.apellidoPaterno) newErrors.apellidoPaterno = 'Completa este campo';
         if (!formData.apellidoMaterno) newErrors.apellidoMaterno = 'Completa este campo';
         if (!formData.nombres) newErrors.nombres = 'Completa este campo';
         if (!formData.genero) newErrors.genero = 'Selecciona un género';
-        if (!formData.correoPersonal) newErrors.correoPersonal = 'Completa este campo';
-        if (!formData.dni) newErrors.dni = 'Completa este campo';
+
+        if (!formData.correoPersonal) {
+            newErrors.correoPersonal = 'Completa este campo';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correoPersonal)) {
+            newErrors.correoPersonal = 'Debe ser un correo válido';
+        }
+
+        if (!formData.dni) {
+            newErrors.dni = 'Completa este campo';
+        } else if (!/^\d+$/.test(formData.dni)) {
+            newErrors.dni = 'Solo se permiten números';
+        }
+
         if (!formData.celular) newErrors.celular = 'Completa este campo';
+
         setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
     };
 
     const textEditor = (options: ColumnEditorOptions) => (

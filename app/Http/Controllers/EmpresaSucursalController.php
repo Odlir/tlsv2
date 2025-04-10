@@ -127,4 +127,21 @@ class EmpresaSucursalController extends Controller
 
         return response()->json($sucursales, 200);
     }
+
+    public function getEmpresaSucursal(Request $request)
+    {
+        // Validar que el término de búsqueda se haya enviado
+        $request->validate([
+            'query' => 'required|string|min:2', // Al menos 2 caracteres para buscar
+        ]);
+
+        // Obtener el término de búsqueda
+        $query = $request->get('query');
+
+        // Buscar en la tabla empresa_sucursals
+        $empresas = EmpresaSucursal::where('nombre', 'LIKE', '%' . $query . '%')
+            ->get();
+
+        return response()->json($empresas);
+    }
 }
