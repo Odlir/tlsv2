@@ -132,7 +132,6 @@ function SidebarProvider({
           data-slot="sidebar-wrapper"
           style={
             {
-                backgroundColor: '#409',
                 "--sidebar-width": SIDEBAR_WIDTH,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
@@ -332,7 +331,6 @@ function SidebarInput({
 function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-        style={{backgroundColor: '#409'}}
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn("flex flex-col gap-2 p-2", className)}
@@ -344,7 +342,6 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
 function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-        style={{backgroundColor: '#409'}}
       data-slot="sidebar-footer"
       data-sidebar="footer"
       className={cn("flex flex-col gap-2 p-2", className)}
@@ -370,7 +367,6 @@ function SidebarSeparator({
 function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-        style={{backgroundColor: '#409'}}
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
