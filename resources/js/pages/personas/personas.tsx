@@ -209,7 +209,6 @@ export default function Personas({ personas }: PersonasProps) {
         <InputText type="text" value={options.value} onChange={(e) => options.editorCallback?.(e.target.value)} className="w-full" />
     );
 
-
     const TreeSelectField: React.FC<TreeSelectFieldProps> = ({ id, label, value, onChange, errors, setErrors }) => (
         <div className="mt-4">
             <FloatLabel>
@@ -225,8 +224,15 @@ export default function Personas({ personas }: PersonasProps) {
                     options={generoOptions}
                     placeholder="Selecciona género"
                     disabled={!isEditing}
-                    className={`w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                        errors?.[id] ? 'border-red-500' : 'border-gray-300'
+                    // className={`w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                    //     errors?.[id] ? 'border-red-500' : 'border-gray-300'
+                    // }`}
+
+                    style={{
+                        textTransform: 'none',
+                    }}
+                    className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                        errors?.[id] ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                     }`}
                 />
                 <label htmlFor={id} className="mb-2 block font-semibold text-gray-700">
@@ -389,8 +395,11 @@ export default function Personas({ personas }: PersonasProps) {
                                             }
                                         }}
                                         disabled={!isEditing}
+                                        style={{
+                                            textTransform: 'none',
+                                        }}
                                         className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                            errors.apellidoPaterno ? 'border-red-500' : 'border-gray-300'
+                                            errors.apellidoPaterno ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                         }`}
                                     />
                                     <label htmlFor="apellidoPaterno" className="mb-2 block font-semibold text-gray-700">
@@ -422,8 +431,11 @@ export default function Personas({ personas }: PersonasProps) {
                                             }
                                         }}
                                         disabled={!isEditing}
+                                        style={{
+                                            textTransform: 'none',
+                                        }}
                                         className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                            errors.apellidoMaterno ? 'border-red-500' : 'border-gray-300'
+                                            errors.apellidoMaterno ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                         }`}
                                     />
                                     <label htmlFor="apellidoMaterno" className="mb-2 block font-semibold text-gray-700">
@@ -457,8 +469,11 @@ export default function Personas({ personas }: PersonasProps) {
                                             }
                                         }}
                                         disabled={!isEditing}
+                                        style={{
+                                            textTransform: 'none',
+                                        }}
                                         className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                            errors.nombres ? 'border-red-500' : 'border-gray-300'
+                                            errors.nombres ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                         }`}
                                     />
                                     <label htmlFor="nombres" className="mb-2 block font-semibold text-gray-700">
@@ -505,8 +520,11 @@ export default function Personas({ personas }: PersonasProps) {
                                         }
                                     }}
                                     disabled={!isEditing}
+                                    style={{
+                                        textTransform: 'none',
+                                    }}
                                     className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                        errors.correoPersonal ? 'border-red-500' : 'border-gray-300'
+                                        errors.correoPersonal ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                     }`}
                                 />
                                 <label htmlFor="correoPersonal" className="mb-2 block font-semibold text-gray-700">
@@ -539,8 +557,11 @@ export default function Personas({ personas }: PersonasProps) {
                                             }
                                         }}
                                         disabled={!isEditing}
+                                        style={{
+                                            textTransform: 'none',
+                                        }}
                                         className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                            errors.dni ? 'border-red-500' : 'border-gray-300'
+                                            errors.dni ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                         }`}
                                     />
                                     <label htmlFor="dni" className="mb-2 block font-semibold text-gray-700">
@@ -572,8 +593,11 @@ export default function Personas({ personas }: PersonasProps) {
                                             }
                                         }}
                                         disabled={!isEditing}
+                                        style={{
+                                            textTransform: 'none',
+                                        }}
                                         className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
-                                            errors.celular ? 'border-red-500' : 'border-gray-300'
+                                            errors.celular ? 'border-2 border-red-500 shadow-md ring-2 ring-red-300' : 'border-gray-300'
                                         }`}
                                     />
                                     <label htmlFor="celular" className="mb-2 block font-semibold text-gray-700">

@@ -16,7 +16,12 @@ import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Colegios', href: '/empresas' }];
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Colegios',
+        href: '/empresas',
+    },
+];
 
 interface Empresa {
     id: number;
@@ -35,6 +40,7 @@ interface Empresa {
     departamento: string;
     provincia: string;
     distrito: string;
+
 }
 
 interface EmpresasProps {
@@ -50,11 +56,10 @@ interface TreeSelectFieldProps {
     onChange: (e: { value: string | null }) => void;
     errors?: Record<string, string | undefined>;
     setErrors?: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>;
-    disabled?: boolean;
 }
 
 interface ErrorsInterface {
-    razonSocial?: string;
+    razon_Social?: string;
     contacto?: string;
     email?: string;
     telefono?: string;
@@ -70,35 +75,9 @@ interface ErrorsInterface {
     [key: string]: string | undefined;
 }
 
-const gestionOptions = [
-    { label: 'Pública', value: 'PUBLICA' },
-    { label: 'Privada', value: 'PRIVADA' },
-    { label: 'Convenio', value: 'CONVENIO' },
-];
-
-const nivelOptions = [
-    { label: 'Inicial', value: 'INICIAL' },
-    { label: 'Primaria', value: 'PRIMARIA' },
-    { label: 'Secundaria', value: 'SECUNDARIA' },
-    { label: 'Superior', value: 'SUPERIOR' },
-];
-
-const departamentoOptions = [
-    { label: 'Lima', value: 'LIMA' },
-    { label: 'Arequipa', value: 'AREQUIPA' },
-    { label: 'Cusco', value: 'CUSCO' },
-];
-
-const provinciaOptions = [
-    { label: 'Lima', value: 'LIMA' },
-    { label: 'Arequipa', value: 'AREQUIPA' },
-    { label: 'Cusco', value: 'CUSCO' },
-];
-
-const distritoOptions = [
-    { label: 'Miraflores', value: 'MIRAFLORES' },
-    { label: 'San Isidro', value: 'SAN_ISIDRO' },
-    { label: 'Barranco', value: 'BARRANCO' },
+const generoOptions = [
+    { label: 'Masculino', value: 'MASCULINO' },
+    { label: 'Femenino', value: 'FEMENINO' },
 ];
 
 export default function Empresas({ empresas }: EmpresasProps) {
@@ -113,7 +92,7 @@ export default function Empresas({ empresas }: EmpresasProps) {
         telefono: '',
         sede: '',
         codigo: '',
-        nivel: null as string | null,
+        nivel: '',
         gestion: null as string | null,
         gestionDepartamento: null as string | null,
         departamento: null as string | null,
@@ -124,7 +103,7 @@ export default function Empresas({ empresas }: EmpresasProps) {
     const [errors, setErrors] = useState<ErrorsInterface>({});
     const [pagination, setPagination] = useState({
         first: 0,
-        rows: 10,
+        rows: 5,
     });
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
@@ -143,6 +122,7 @@ export default function Empresas({ empresas }: EmpresasProps) {
 
     const handleView = (rowData: Empresa) => {
         setFormData({
+
             razonSocial: rowData.razon_social,
             contacto: rowData.contacto,
             email: rowData.email,
@@ -201,14 +181,14 @@ export default function Empresas({ empresas }: EmpresasProps) {
 
                 Swal.fire({
                     title: 'Eliminado',
-                    text: 'El colegio ha sido eliminado correctamente.',
+                    text: 'La persona ha sido eliminada.',
                     icon: 'success',
                     timer: 2000,
                     showConfirmButton: false,
                 });
             } catch (error) {
-                console.error('Error al eliminar el colegio', error);
-                Swal.fire('Error', 'Ocurrió un error al eliminar el colegio.', 'error');
+                console.error('Error al eliminar la persona', error);
+                Swal.fire('Error', 'Ocurrió un error al eliminar la persona.', 'error');
             }
         }
     };
@@ -224,29 +204,14 @@ export default function Empresas({ empresas }: EmpresasProps) {
                 await axios.put(`/empresas/${id}`, formData, {
                     headers: { 'Content-Type': 'application/json' },
                 });
-                Swal.fire({
-                    title: 'Actualizado',
-                    text: 'El colegio ha sido actualizado correctamente.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
             } else {
                 await axios.post('/empresas', formData, {
                     headers: { 'Content-Type': 'application/json' },
                 });
-                Swal.fire({
-                    title: 'Creado',
-                    text: 'El colegio ha sido creado correctamente.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
             }
             window.location.reload();
         } catch (error) {
-            console.error('Error al guardar el colegio', error);
-            Swal.fire('Error', 'Ocurrió un error al guardar el colegio.', 'error');
+            console.error('Error al guardar la persona', error);
         }
     };
 
@@ -258,7 +223,7 @@ export default function Empresas({ empresas }: EmpresasProps) {
             telefono: '',
             sede: '',
             codigo: '',
-            nivel: null,
+            nivel: '',
             gestion: null,
             gestionDepartamento: null,
             departamento: null,
@@ -266,106 +231,81 @@ export default function Empresas({ empresas }: EmpresasProps) {
             distrito: null,
         });
         setId(null);
-        setErrors({});
     };
 
     const validateFields = () => {
         const newErrors: ErrorsInterface = {};
-        if (!formData.razonSocial) newErrors.razonSocial = 'La razón social es requerida';
-        if (!formData.email) newErrors.email = 'El correo electrónico es requerido';
-        if (!formData.contacto) newErrors.contacto = 'El contacto es requerido';
-        if (!formData.telefono) newErrors.telefono = 'El teléfono es requerido';
-        if (!formData.sede) newErrors.sede = 'La sede es requerida';
-        if (!formData.codigo) newErrors.codigo = 'El código es requerido';
-        if (!formData.nivel) newErrors.nivel = 'El nivel es requerido';
-        if (!formData.gestion) newErrors.gestion = 'La gestión es requerida';
-        if (!formData.gestionDepartamento) newErrors.gestionDepartamento = 'La gestión de departamento es requerida';
-        if (!formData.departamento) newErrors.departamento = 'El departamento es requerido';
-        if (!formData.provincia) newErrors.provincia = 'La provincia es requerida';
-        if (!formData.distrito) newErrors.distrito = 'El distrito es requerido';
-
+        if (!formData.razonSocial) newErrors.razonSocial = 'Completa este campo';
+        if (!formData.email) newErrors.email = 'Completa este campo';
+        if (!formData.contacto) newErrors.contacto = 'Completa este campo';
+        if (!formData.telefono) newErrors.telefono = 'Selecciona un género';
+        if (!formData.sede) newErrors.sede = 'Completa este campo';
+        if (!formData.codigo) newErrors.codigo = 'Completa este campo';
+        if (!formData.nivel) newErrors.nivel = 'Completa este campo';
+        if (!formData.gestion) newErrors.gestion = 'Completa este campo';
+        if (!formData.gestionDepartamento) newErrors.gestionDepartamento = 'Completa este campo';
+        if (!formData.departamento) newErrors.departamento = 'Completa este campo';
+        if (!formData.provincia) newErrors.provincia = 'Completa este campo';
+        if (!formData.distrito) newErrors.distrito = 'Completa este campo';
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     const textEditor = (options: ColumnEditorOptions) => (
-        <InputText
-            type="text"
-            value={options.value}
-            onChange={(e) => options.editorCallback?.(e.target.value)}
-            className="w-full rounded border p-2"
-        />
+        <InputText type="text" value={options.value} onChange={(e) => options.editorCallback?.(e.target.value)} className="w-full" />);
+
+    const TreeSelectField: React.FC<TreeSelectFieldProps> = ({ id, label, value, onChange, errors, setErrors }) => (
+        <div className="mt-4">
+            <FloatLabel>
+                <Dropdown
+                    inputId={id}
+                    value={value}
+                    onChange={(e) => {
+                        onChange(e);
+                        if (errors?.[id] && setErrors) {
+                            setErrors({ ...errors, [id]: undefined });
+                        }
+                    }}
+                    options={generoOptions}
+                    placeholder="Selecciona género"
+                    disabled={!isEditing}
+                    className={`w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                        errors?.[id] ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                />
+                <label htmlFor={id} className="mb-2 block font-semibold text-gray-700">
+                    {label}
+                </label>
+                {errors?.[id] && (
+                    <div className="absolute top-0 right-0 mt-2 mr-2">
+                        <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                            <span className="mr-2 text-orange-500">
+                                <i className="pi pi-exclamation-triangle"></i>
+                            </span>
+                            <span className="text-gray-700">{errors[id]}</span>
+                        </div>
+                    </div>
+                )}
+            </FloatLabel>
+        </div>
     );
 
-    const TreeSelectField: React.FC<TreeSelectFieldProps> = ({ id, label, value, onChange, errors, setErrors, disabled = false }) => {
-        const options =
-            {
-                gestion: gestionOptions,
-                nivel: nivelOptions,
-                departamento: departamentoOptions,
-                provincia: provinciaOptions,
-                distrito: distritoOptions,
-                gestionDepartamento: gestionOptions,
-            }[id] || [];
-
-        return (
-            <div className="mt-4">
-                <FloatLabel>
-                    <Dropdown
-                        inputId={id}
-                        value={value}
-                        onChange={(e) => {
-                            onChange(e);
-                            if (errors?.[id] && setErrors) {
-                                setErrors({ ...errors, [id]: undefined });
-                            }
-                        }}
-                        options={options}
-                        optionLabel="label"
-                        placeholder={`Seleccione ${label.toLowerCase()}`}
-                        disabled={disabled || !isEditing}
-                        className={`w-full ${errors?.[id] ? 'border-red-500' : 'border-gray-300'}`}
-                    />
-                    <label htmlFor={id} className={`font-medium ${value ? 'text-blue-600' : 'text-gray-700'}`}>
-                        {label}
-                    </label>
-                    {errors?.[id] && (
-                        <div className="text-red-500 text-sm mt-1 flex items-center">
-                            <i className="pi pi-exclamation-circle mr-1"></i>
-                            {errors[id]}
-                        </div>
-                    )}
-                </FloatLabel>
-            </div>
-        );
-    };
-
     const dialogHeader = (
-        <div className="flex items-center gap-2">
-            <i className={`pi ${isEditing ? (id ? 'pi-pencil' : 'pi-plus') : 'pi-eye'}`} />
-            <span className="text-lg font-bold">{isEditing ? (id ? 'Editar Colegio' : 'Nuevo Colegio') : 'Detalles del Colegio'}</span>
+        <div className="inline-flex items-center justify-center gap-2">
+            <span className="font-bold whitespace-nowrap">Registrar Colegio</span>
         </div>
     );
 
     const dialogFooter = (
         <div className="flex justify-end gap-3">
-            <Button label="Cancelar" icon="pi pi-times" onClick={() => setVisible(false)} className="p-button-text" />
-            {isEditing && (
-                <Button
-                    label={id ? 'Actualizar' : 'Guardar'}
-                    icon={`pi ${id ? 'pi-check' : 'pi-save'}`}
-                    onClick={saveEmpresas}
-                    className="bg-blue-600 text-white hover:bg-blue-700"
-                />
-            )}
+            {isEditing && <Button label={id ? 'Editar' : 'Crear'} onClick={saveEmpresas} className="bg-indigo-600 text-white hover:bg-indigo-700" />}
         </div>
     );
 
     const filteredEmpresas = selectedEmpresas
         .filter((empresa) => {
-            const searchContent =
-                `${empresa.razon_social} ${empresa.contacto} ${empresa.email} ${empresa.telefono} ${empresa.sede} ${empresa.codigo} ${empresa.nivel}`.toLowerCase();
-            return searchContent.includes(searchTerm.toLowerCase());
+            const fullName =
+                `${empresa.email} ${empresa.contacto} ${empresa.sede} ${empresa.nivel} ${empresa.telefono}`.toLowerCase();
+            return fullName.includes(searchTerm.toLowerCase());
         })
         .sort((a, b) => a.id - b.id);
 
@@ -375,40 +315,37 @@ export default function Empresas({ empresas }: EmpresasProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Colegios" />
 
-            <div className="flex flex-1 flex-col gap-6 rounded-xl bg-white p-6 shadow-md">
+            <div className="flex flex-1 flex-col gap-6 rounded-2xl bg-white p-8 shadow-lg">
                 <div className="flex items-center gap-4 border-b pb-4">
-                    <div className="rounded-full bg-blue-100 p-3">
-                        <School className="text-blue-600" size={24} />
-                    </div>
-                    <h1 className="text-2xl font-semibold text-gray-800">Mantenimiento de Colegios</h1>
+                    <i className="fas fa-user-friends text-2xl text-indigo-600 " />
+                    <School />
+                    <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Mantenimiento de Colegios</h1>
                 </div>
 
-                <div className="flex flex-col justify-between gap-4 md:flex-row">
-                    <IconField iconPosition="left" className="w-full md:w-1/2">
+                <div className="mb-6 flex items-center justify-between">
+                    <IconField iconPosition="left" className="w-1/2">
                         <InputIcon className="pi pi-search" />
                         <InputText
-                            placeholder="Buscar colegio..."
+                            placeholder="Buscar persona..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10"
+                            className="w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </IconField>
 
-                    <div className="flex gap-2">
-                        <Button
-                            label="Nuevo Colegio"
-                            icon="pi pi-plus"
-                            onClick={() => {
-                                resetForm();
-                                setIsEditing(true);
-                                setVisible(true);
-                            }}
-                            className="bg-blue-600 text-white hover:bg-blue-700"
-                        />
-                    </div>
+                    <Button
+                        label="Crear Colegios"
+                        icon="pi pi-plus"
+                        className="bg-indigo-600 text-white shadow-md transition duration-300 hover:bg-indigo-700"
+                        onClick={() => {
+                            resetForm();
+                            setIsEditing(true);
+                            setVisible(true);
+                        }}
+                    />
                 </div>
 
-                <div className="card shadow-sm">
+                <div className="card">
                     <DataTable
                         value={paginatedEmpresas}
                         tableStyle={{ minWidth: '50rem' }}
@@ -416,44 +353,44 @@ export default function Empresas({ empresas }: EmpresasProps) {
                         dataKey="id"
                         onRowEditComplete={onRowEditComplete}
                         paginator={false}
-                        stripedRows
-                        size="small"
                     >
-                        <Column field="id" header="ID" body={(_, { rowIndex }) => pagination.first + rowIndex + 1} style={{ width: '5%' }} />
-                        <Column field="razon_social" header="Razón Social" editor={textEditor} style={{ width: '20%' }} />
-                        <Column field="contacto" header="Contacto" editor={textEditor} style={{ width: '15%' }} />
-                        <Column field="email" header="Correo" editor={textEditor} style={{ width: '15%' }} />
-                        <Column field="telefono" header="Teléfono" editor={textEditor} style={{ width: '10%' }} />
-                        <Column field="sede" header="Sede" editor={textEditor} style={{ width: '10%' }} />
-                        <Column field="nivel" header="Nivel" editor={textEditor} style={{ width: '10%' }} />
+                        <Column
+                            field="id"
+                            header="ID"
+                            body={(_, { rowIndex }) => pagination.first + rowIndex + 1}
+                            className="font-medium text-gray-700"
+                        />
+                        <Column field="razon_social" header="Razón Social" editor={textEditor} />
+                        <Column field="contacto" header="Contacto" editor={textEditor} />
+                        <Column field="email" header="Correo Personal" editor={textEditor} />
+                        <Column field="telefono" header="Teléfono" editor={textEditor} />
                         <Column
                             header="Acciones"
                             body={(rowData) => (
-                                <div className="flex justify-center gap-2">
+                                <div className="flex items-center justify-center gap-2">
                                     <Button
                                         icon="pi pi-eye"
-                                        className="p-button-rounded p-button-success p-button-text"
+                                        className="rounded-md bg-green-500 p-2 text-white transition duration-300 hover:bg-green-600"
                                         onClick={() => handleView(rowData)}
-                                        tooltip="Ver detalles"
+                                        tooltip="Ver"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-pencil"
-                                        className="p-button-rounded p-button-warning p-button-text"
+                                        className="rounded-md bg-yellow-500 p-2 text-white transition duration-300 hover:bg-yellow-600"
                                         onClick={() => handleEdit(rowData)}
                                         tooltip="Editar"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                     <Button
                                         icon="pi pi-trash"
-                                        className="p-button-rounded p-button-danger p-button-text"
+                                        className="rounded-md bg-red-500 p-2 text-white transition duration-300 hover:bg-red-600"
                                         onClick={() => handleDelete(rowData)}
                                         tooltip="Eliminar"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                 </div>
                             )}
-                            style={{ width: '15%' }}
                         />
                     </DataTable>
 
@@ -461,10 +398,9 @@ export default function Empresas({ empresas }: EmpresasProps) {
                         first={pagination.first}
                         rows={pagination.rows}
                         totalRecords={filteredEmpresas.length}
-                        rowsPerPageOptions={[5, 10, 20, 50]}
+                        rowsPerPageOptions={[5, 10, 20]}
                         onPageChange={onPageChange}
-                        className="mt-4 border-t pt-4"
-                        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                        className="mt-4"
                     />
                 </div>
 
@@ -473,15 +409,17 @@ export default function Empresas({ empresas }: EmpresasProps) {
                     modal
                     header={dialogHeader}
                     footer={dialogFooter}
-                    style={{ width: '50vw', maxWidth: '800px' }}
+                    style={{ width: '50rem' }}
                     onHide={() => setVisible(false)}
                     className="rounded-lg"
-                    breakpoints={{ '960px': '75vw', '640px': '90vw' }}
                 >
-                    <div className="space-y-4 p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Razón Social */}
-                            <div className="col-span-2">
+                    <div className="space-y-3 rounded-lg border border-gray-300 p-8 shadow-lg dark:border-zinc-700">
+                        <h2 className="text-center text-3xl font-semibold text-gray-800">
+                            {isEditing ? (id ? 'Editar Persona' : 'Crear Nueva Persona') : 'Detalles de la Persona'}
+                        </h2>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-1">
+                            <div className="relative mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="razonSocial"
@@ -489,19 +427,69 @@ export default function Empresas({ empresas }: EmpresasProps) {
                                         value={formData.razonSocial}
                                         onChange={(e) => {
                                             setFormData({ ...formData, razonSocial: e.target.value });
-                                            if (errors.razonSocial) setErrors({ ...errors, razonSocial: undefined });
+                                            if (errors.razonSocial) {
+                                                setErrors({ ...errors, razonSocial: undefined });
+                                            }
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-full ${errors.razonSocial ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.razonSocial ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
-                                    <label htmlFor="razonSocial" className={`font-medium ${formData.razonSocial ? 'text-blue-600' : ''}`}>
+                                    <label htmlFor="razonSocial" className="mb-2 block font-semibold text-gray-700">
                                         Razón Social
                                     </label>
-                                    {errors.razonSocial && <small className="text-red-500">{errors.razonSocial}</small>}
+                                    {errors.razonSocial && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.razonSocial}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </FloatLabel>
                             </div>
+                        </div>
 
-                            <div>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-1">
+                            <div className="relative mt-4">
+                                <FloatLabel>
+                                    <InputText
+                                        id="email"
+                                        type="text"
+                                        value={formData.email}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, email: e.target.value });
+                                            if (errors.correoContacto) {
+                                                setErrors({ ...errors, email: undefined });
+                                            }
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.email ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                    />
+                                    <label htmlFor="email" className="mb-2 block font-semibold text-gray-700">
+                                        Correo Contacto
+                                    </label>
+                                    {errors.email && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.email}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </FloatLabel>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div className="relative mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="contacto"
@@ -509,59 +497,67 @@ export default function Empresas({ empresas }: EmpresasProps) {
                                         value={formData.contacto}
                                         onChange={(e) => {
                                             setFormData({ ...formData, contacto: e.target.value });
-                                            if (errors.contacto) setErrors({ ...errors, contacto: undefined });
+                                            if (errors.contacto) {
+                                                setErrors({ ...errors, contacto: undefined });
+                                            }
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-full ${errors.contacto ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.contacto ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
-                                    <label htmlFor="contacto" className="font-medium">
+                                    <label htmlFor="contacto" className="mb-2 block font-semibold text-gray-700">
                                         Contacto
                                     </label>
-                                    {errors.contacto && <small className="text-red-500">{errors.contacto}</small>}
+                                    {errors.contacto && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.contacto}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </FloatLabel>
                             </div>
 
-                            <div>
-                                <FloatLabel>
-                                    <InputText
-                                        id="email"
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => {
-                                            setFormData({ ...formData, email: e.target.value });
-                                            if (errors.email) setErrors({ ...errors, email: undefined });
-                                        }}
-                                        disabled={!isEditing}
-                                        className={`w-full ${errors.email ? 'border-red-500' : ''}`}
-                                    />
-                                    <label htmlFor="email" className="font-medium">
-                                        Correo Electrónico
-                                    </label>
-                                    {errors.email && <small className="text-red-500">{errors.email}</small>}
-                                </FloatLabel>
-                            </div>
-
-                            <div>
+                            <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="telefono"
-                                        type="tel"
+                                        type="text"
                                         value={formData.telefono}
                                         onChange={(e) => {
                                             setFormData({ ...formData, telefono: e.target.value });
-                                            if (errors.telefono) setErrors({ ...errors, telefono: undefined });
+                                            if (errors.telefono) {
+                                                setErrors({ ...errors, telefono: undefined });
+                                            }
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-full ${errors.telefono ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.telefono ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
-                                    <label htmlFor="telefono" className="font-medium">
+                                    <label htmlFor="telefono" className="mb-2 block font-semibold text-gray-700">
                                         Teléfono
                                     </label>
-                                    {errors.telefono && <small className="text-red-500">{errors.telefono}</small>}
+                                    {errors.telefono && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.telefono}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </FloatLabel>
                             </div>
+                        </div>
 
-                            <div>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div className="relative mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="sede"
@@ -569,19 +565,32 @@ export default function Empresas({ empresas }: EmpresasProps) {
                                         value={formData.sede}
                                         onChange={(e) => {
                                             setFormData({ ...formData, sede: e.target.value });
-                                            if (errors.sede) setErrors({ ...errors, sede: undefined });
+                                            if (errors.sede) {
+                                                setErrors({ ...errors, sede: undefined });
+                                            }
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-full ${errors.sede ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.sede ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
-                                    <label htmlFor="sede" className="font-medium">
+                                    <label htmlFor="sede" className="mb-2 block font-semibold text-gray-700">
                                         Sede
                                     </label>
-                                    {errors.sede && <small className="text-red-500">{errors.sede}</small>}
+                                    {errors.sede && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.sede}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </FloatLabel>
                             </div>
 
-                            <div>
+                            <div className="mt-4">
                                 <FloatLabel>
                                     <InputText
                                         id="codigo"
@@ -589,105 +598,141 @@ export default function Empresas({ empresas }: EmpresasProps) {
                                         value={formData.codigo}
                                         onChange={(e) => {
                                             setFormData({ ...formData, codigo: e.target.value });
-                                            if (errors.codigo) setErrors({ ...errors, codigo: undefined });
+                                            if (errors.codigo) {
+                                                setErrors({ ...errors, codigo: undefined });
+                                            }
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-full ${errors.codigo ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.codigo ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                     />
-                                    <label htmlFor="codigo" className="font-medium">
+                                    <label htmlFor="codigo" className="mb-2 block font-semibold text-gray-700">
                                         Código
                                     </label>
-                                    {errors.codigo && <small className="text-red-500">{errors.codigo}</small>}
+                                    {errors.codigo && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.codigo}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </FloatLabel>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div className="relative mt-4">
+                                <FloatLabel>
+                                    <InputText
+                                        id="nivel"
+                                        type="text"
+                                        value={formData.nivel}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, nivel: e.target.value });
+                                            if (errors.nivel) {
+                                                setErrors({ ...errors, nivel: undefined });
+                                            }
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-full rounded-md border p-3 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none ${
+                                            errors.nivel ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                    />
+                                    <label htmlFor="nivel" className="mb-2 block font-semibold text-gray-700">
+                                        Nivel
+                                    </label>
+                                    {errors.nivel && (
+                                        <div className="absolute top-0 right-0 mt-2 mr-2">
+                                            <div className="flex items-center rounded border border-gray-200 bg-white p-2 shadow-md">
+                                                <span className="mr-2 text-orange-500">
+                                                    <i className="pi pi-exclamation-triangle"></i>
+                                                </span>
+                                                <span className="text-gray-700">{errors.nivel}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </FloatLabel>
                             </div>
 
-                            <div>
-                                <TreeSelectField
-                                    id="nivel"
-                                    label="Nivel Educativo"
-                                    value={formData.nivel}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, nivel: e.value });
-                                        if (errors.nivel) setErrors({ ...errors, nivel: undefined });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
+                            <div className="mt-4">
+                                    <TreeSelectField
+                                        id="gestion"
+                                        label="Gestión"
+                                        value={formData.gestion}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, gestion: e.value });
+                                            if (errors.gestion) {
+                                                setErrors({ ...errors, gestion: undefined });
+                                            }
+                                        }}
+                                        errors={errors}
+                                        setErrors={setErrors}
+                                    />
                             </div>
+                        </div>
 
-                            <div>
-                                <TreeSelectField
-                                    id="gestion"
-                                    label="Tipo de Gestión"
-                                    value={formData.gestion}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, gestion: e.value });
-                                        if (errors.gestion) setErrors({ ...errors, gestion: undefined });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
-                            </div>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <TreeSelectField
+                                id="gestionDepartamento"
+                                label="Gestión Departamento"
+                                value={formData.gestionDepartamento}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, gestionDepartamento: e.value });
+                                    if (errors.gestionDepartamento) {
+                                        setErrors({ ...errors, gestionDepartamento: undefined });
+                                    }
+                                }}
+                                errors={errors}
+                                setErrors={setErrors}
+                            />
 
-                            <div>
-                                <TreeSelectField
-                                    id="gestionDepartamento"
-                                    label="Gestión Departamento"
-                                    value={formData.gestionDepartamento}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, gestionDepartamento: e.value });
-                                        if (errors.gestionDepartamento)
-                                            setErrors({
-                                                ...errors,
-                                                gestionDepartamento: undefined,
-                                            });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
-                            </div>
+                            <TreeSelectField
+                                id="departamento"
+                                label="Departamento"
+                                value={formData.departamento}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, departamento: e.value });
+                                    if (errors.departamento) {
+                                        setErrors({ ...errors, departamento: undefined });
+                                    }
+                                }}
+                                errors={errors}
+                                setErrors={setErrors}
+                            />
+                        </div>
 
-                            <div>
-                                <TreeSelectField
-                                    id="departamento"
-                                    label="Departamento"
-                                    value={formData.departamento}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, departamento: e.value });
-                                        if (errors.departamento) setErrors({ ...errors, departamento: undefined });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
-                            </div>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <TreeSelectField
+                                id="provincia"
+                                label="Provincia"
+                                value={formData.provincia}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, provincia: e.value });
+                                    if (errors.provincia) {
+                                        setErrors({ ...errors, provincia: undefined });
+                                    }
+                                }}
+                                errors={errors}
+                                setErrors={setErrors}
+                            />
 
-                            <div>
-                                <TreeSelectField
-                                    id="provincia"
-                                    label="Provincia"
-                                    value={formData.provincia}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, provincia: e.value });
-                                        if (errors.provincia) setErrors({ ...errors, provincia: undefined });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
-                            </div>
-
-                            <div>
-                                <TreeSelectField
-                                    id="distrito"
-                                    label="Distrito"
-                                    value={formData.distrito}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, distrito: e.value });
-                                        if (errors.distrito) setErrors({ ...errors, distrito: undefined });
-                                    }}
-                                    errors={errors}
-                                    setErrors={setErrors}
-                                />
-                            </div>
+                            <TreeSelectField
+                                id="distrito"
+                                label="Distrito"
+                                value={formData.distrito}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, distrito: e.value });
+                                    if (errors.distrito) {
+                                        setErrors({ ...errors, distrito: undefined });
+                                    }
+                                }}
+                                errors={errors}
+                                setErrors={setErrors}
+                            />
                         </div>
                     </div>
                 </Dialog>
